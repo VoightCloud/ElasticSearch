@@ -1,0 +1,43 @@
+# Derived from https://github.com/elastic/helm-charts/tree/master/elasticsearch
+
+replicas: 2
+minimumMasterNodes: 1
+
+image: "elasticsearch"
+imageTag: "7.9.2"
+imagePullPolicy: "IfNotPresent"
+
+volumeClaimTemplate:
+  accessModes: [ "ReadWriteOnce" ]
+  storageClassName: "nfs-nas"
+  resources:
+    requests:
+      storage: 300Gi
+
+rbac:
+  create: true
+  serviceAccountName: elasticsearch-sa
+
+service:
+  labels: {}
+  labelsHeadless: {}
+  type: LoadBalancer
+  nodePort: ""
+  annotations: {}
+  httpPortName: http
+  transportPortName: transport
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+
+extraEnvs:
+  - name: ELASTIC_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: elastic-credentials
+        key: password
+  - name: ELASTIC_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: elastic-credentials
+        key: username
+
