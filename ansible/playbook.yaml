@@ -1,0 +1,64 @@
+- name: Install EKS
+  hosts: localhost
+  vars_files:
+    - files/elastic_vars.yaml
+  var:
+    namespace: monitoring
+
+  tasks:
+    - name: Install Openshift Python Library
+      command: pip3 install openshift
+      delegate_to: localhost
+
+    - name: Install Ansible
+      become: true
+      apt:
+        name: ansible
+        state: present
+        update_cache: yes
+      delegate_to: localhost
+
+    - name: Install Ansible Galaxy Kubernetes
+      command: ansible-galaxy collection install community.kubernetes
+      delegate_to: localhost
+
+    - name: Create monitoring namespace
+      community.kubernetes.k8s:
+        name: "{{ namespace }}"
+        api_version: v1
+        kind: namespace
+        state: present
+      delegate_to: localhost
+
+    - name: Add Elastic Search Repo
+      community.kubernetes.helm_repository:
+        name: elastic
+        repo_url: "https://helm.elastic.co"
+      delegate_to: localhost
+
+    - name: Copy Customization chart
+      copy:
+        src: ../elasticsecret
+        dest: /tmp/
+      delegate_to: localhost
+
+    - name: Copy Customization
+      copy:
+        src: ../elasticsearch-values.yaml
+        dest: /tmp/
+      delegate_to: localhost
+
+    - name: Apply Elastic Search Secrets
+      command: >
+        helm install -n "{{ namespace }}" elasticsecret /tmp/elasticsecret
+        --set elasticsearch.username="{{ elasticuser }}"
+        --set elasticsearch.password="{{ elasticpass }}"
+        --set namespace="{{ namespace }}"
+      delegate_to: localhost
+
+    - name: Install Elastic Search
+      command: >
+        helm  install -n "{{ namespace }}"
+        elasticsearch elastic/elasticsearch
+        -f /tmp/elasticsearch-values.yaml
+      delegate_to: localhost
