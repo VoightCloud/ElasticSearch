@@ -4,7 +4,7 @@ replicas: 2
 minimumMasterNodes: 1
 
 image: "elasticsearch"
-imageTag: "7.9.2"
+imageTag: "7.12.1"
 imagePullPolicy: "IfNotPresent"
 
 volumeClaimTemplate:
