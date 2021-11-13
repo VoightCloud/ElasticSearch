@@ -1,0 +1,9 @@
+- name: Install ElasticSearch
+  hosts: localhost
+  connection: local
+
+  vars:
+    namespace: monitoring
+
+  roles:
+    - elasticsearch
