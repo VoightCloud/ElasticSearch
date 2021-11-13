@@ -22,7 +22,7 @@
 
 - name: Add ElasticSearch Secrets
   kubernetes.core.helm:
-    name: "{{ deployment }}-secrets"
+    name: "{{ namespace }}-secrets"
     chart_ref: ./roles/elasticsearch/files/secrets
     release_namespace: "{{ namespace }}"
     release_values:
@@ -38,6 +38,9 @@
     chart_version: 7.15.0
     release_namespace: "{{ namespace }}"
     release_values:
+      esConfig:
+        elasticsearch.yml: |
+          xpack.security.enabled: false
       extraEnvs:
         - name: ELASTIC_PASSWORD
           valueFrom:
